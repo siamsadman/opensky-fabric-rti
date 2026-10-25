@@ -39,3 +39,7 @@
 - First tile showed 'Time range: Last 1 hour' while the chart covered about 10:00-11:15 UTC (more than an hour).
 - Learn docs say the built-in time filter stays inactive unless the query uses _startTime/_endTime.
 - Fix: added where position_time between (_startTime .. _endTime) to the tile query. Auto refresh enabled afterwards.
+
+## 2026-10-25 - Simple rapid-descent rule was mostly noise (observed, about 17:48 Dhaka time)
+- Q5: of 12 readings reported below -20 m/s, 2 matched the altitude change between consecutive readings (within 5 m/s), 10 did not. Small sample (about 85 minutes). Cause of the mismatches not investigated.
+- Decision: dashboard tile 2 and the planned alert use the stricter rule (reported rate below -20 m/s AND within 5 m/s of the altitude-derived rate). Expected to fire rarely.

@@ -6,3 +6,17 @@ aircraft_clean()
 | summarize aircraft = dcount(icao24), airborne = dcountif(icao24, not(on_ground)) by bin(position_time, 5m)
 | order by position_time asc
 | render timechart
+
+// Tile 2: rapid descents where the reported rate (below -20 m/s) agrees with the altitude change between consecutive readings (tolerance 5 m/s, my choice)
+aircraft_clean()
+| where position_time between (_startTime .. _endTime)
+| where not(on_ground) and isnotnull(baro_altitude_m) and isnotnull(vertical_rate_ms)
+| sort by icao24 asc, position_time asc
+| extend prev_icao = prev(icao24), prev_time = prev(position_time), prev_alt = prev(baro_altitude_m)
+| where prev_icao == icao24
+| extend dt_s = datetime_diff('second', position_time, prev_time)
+| where dt_s between (5 .. 120)
+| extend computed_vr = (baro_altitude_m - prev_alt) / dt_s
+| where vertical_rate_ms < -20 and abs(vertical_rate_ms - computed_vr) <= 5
+| project position_time, origin_country, vertical_rate_ms, computed_vr = round(computed_vr, 1), baro_altitude_m, latitude, longitude
+| order by position_time desc
