@@ -56,3 +56,9 @@
 - A Fabric notification appeared: 'There was an error with the Teams subscription. Please get a Microsoft Office subscription.' I did not determine what triggered it (a real activation or something else).
 - Together with the earlier email test failure (no email address in profile) and Outlook/Teams not opening for this account, notification delivery could not be verified.
 - Decision: no extra work on delivery. README states: rule defined, activations recorded, delivery not verified.
+
+## 2026-10-25 - Correction: live-feed rows vs recorded activations (observed, about 19:03 Dhaka time)
+- My earlier entry said 3 activations. The Live feed tab listed 3 rows matching the condition (11:44:16, 12:15:17, 12:44:52 UTC), but the History tab shows 1 rule activation (12:44:52 UTC).
+- Likely reason, not verified: the other two rows arrived before the condition was corrected from 'equal to' to 'less than'; docs say activations run on newly ingested data once a rule starts.
+- The single activation was borderline: reported rate -21.46 m/s vs -16.7 m/s derived from altitude change.
+- Claim for README: rule running, 1 recorded activation, 3 matching rows in the live feed, notification delivery not verified.
