@@ -62,3 +62,9 @@
 - Likely reason, not verified: the other two rows arrived before the condition was corrected from 'equal to' to 'less than'; docs say activations run on newly ingested data once a rule starts.
 - The single activation was borderline: reported rate -21.46 m/s vs -16.7 m/s derived from altitude change.
 - Claim for README: rule running, 1 recorded activation, 3 matching rows in the live feed, notification delivery not verified.
+
+## 2026-10-25 - Dashboard export (observed, about 19:20 Dhaka time)
+- Exported OpenSky_Live_Dashboard via Manage > Export to file. The raw file was moved outside the repo.
+- The export contained identifiers (dashboard id, eTag, cluster URI, database artifact id, workspace id). Replaced with REDACTED- placeholders (6 occurrences) in fabric-export/OpenSky_Live_Dashboard.sanitized.json.
+- First sanitising pass missed the eTag (escaped text); my own leak check had the same blind spot. Fixed with a regex on the eTag line and re-checked by counting occurrences, not lines.
+- The sanitized file has no working data source, so it documents the tiles and queries but cannot be re-imported as-is.
