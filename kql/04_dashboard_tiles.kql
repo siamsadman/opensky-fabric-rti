@@ -1,0 +1,8 @@
+// 04_dashboard_tiles.kql - queries behind the OpenSky_Live_Dashboard tiles
+
+// Tile 1: distinct aircraft per 5 minutes (honours the dashboard time range)
+aircraft_clean()
+| where position_time between (_startTime .. _endTime)
+| summarize aircraft = dcount(icao24), airborne = dcountif(icao24, not(on_ground)) by bin(position_time, 5m)
+| order by position_time asc
+| render timechart

@@ -34,3 +34,8 @@
 - One-pass breakdown: 11,257 raw rows = 0 without position + 9,402 unique positions + 1,855 repeated rows (about 16.5 percent repeats).
 - In this sample the whole raw-vs-clean gap is repeats; no rows lacked a position.
 - An earlier two-step count (10,916 raw / 9,133 clean) was taken at different moments while data kept arriving, so I did not use it for the repeat rate.
+
+## 2026-10-25 - Dashboard time range label did not match the data (observed)
+- First tile showed 'Time range: Last 1 hour' while the chart covered about 10:00-11:15 UTC (more than an hour).
+- Learn docs say the built-in time filter stays inactive unless the query uses _startTime/_endTime.
+- Fix: added where position_time between (_startTime .. _endTime) to the tile query. Auto refresh enabled afterwards.
