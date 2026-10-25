@@ -21,3 +21,13 @@ aircraft_clean()
 | where squawk in ("7500", "7600", "7700")
 | project position_time, icao24, callsign, origin_country, squawk, latitude, longitude, baro_altitude_m
 | order by position_time desc
+
+// Q4: how often would candidate rapid-descent thresholds fire (m/s, negative = descending) - used to pick the alert rule
+aircraft_clean()
+| where not(on_ground) and isnotnull(vertical_rate_ms)
+| summarize readings = count(),
+            below_minus15 = countif(vertical_rate_ms < -15),
+            below_minus20 = countif(vertical_rate_ms < -20),
+            below_minus25 = countif(vertical_rate_ms < -25),
+            aircraft_below_minus20 = dcountif(icao24, vertical_rate_ms < -20),
+            minutes_of_data = datetime_diff('minute', max(position_time), min(position_time))
