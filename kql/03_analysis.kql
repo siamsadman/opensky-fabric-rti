@@ -1,0 +1,7 @@
+// 03_analysis.kql - analysis queries, run one at a time
+
+// Q1: distinct aircraft per 5-minute window (all vs airborne)
+aircraft_clean()
+| summarize aircraft = dcount(icao24), airborne = dcountif(icao24, not(on_ground)) by bin(position_time, 5m)
+| order by position_time asc
+| render timechart
