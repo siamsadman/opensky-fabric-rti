@@ -55,3 +55,10 @@ aircraft_states
 | extend gap_s = datetime_diff('second', snapshot_time, prev_snapshot)
 | where gap_s > 90
 | project prev_snapshot, snapshot_time, gap_s
+
+// Q7: final counts after the producer was stopped
+print raw_rows = toscalar(aircraft_states | count),
+      first_event = toscalar(aircraft_states | summarize min(EventEnqueuedUtcTime)),
+      last_event = toscalar(aircraft_states | summarize max(EventEnqueuedUtcTime)),
+      unique_positions = toscalar(aircraft_clean() | count),
+      distinct_aircraft = toscalar(aircraft_clean() | summarize dcount(icao24))

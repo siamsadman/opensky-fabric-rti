@@ -82,3 +82,9 @@
 - The last two match the producer timeouts (19:17-19:27 Dhaka = 13:17-13:27 UTC). The first five (12:13-12:43 UTC = 18:13-18:43 Dhaka) are unexplained; I did not see the producer window for that period.
 - Gaps total 1,957 s between consecutive snapshots (each includes a normal ~60 s interval).
 - Consequence: not a continuous 60 s series. The Q5 consistency check only used reading pairs 5-120 s apart, so gaps reduce that sample.
+
+## 2026-10-25 - Final counts after stopping the producer (observed, query run at 13:37 UTC)
+- raw_rows 54,587; first_event 2026-10-25 10:16:14 UTC; last_event 2026-10-25 13:34:39 UTC (span 3 h 18 min, with the gaps listed above).
+- unique_positions 46,004 (aircraft_clean(): one row per icao24 + position_time); distinct_aircraft about 1,086 (dcount estimate).
+- Rows removed by aircraft_clean(): 8,583 (about 15.7 percent of raw); mostly repeated positions, but rows with no position would also be removed (not separately counted for the full table).
+- 'Rows' here means ingested events, not distinct readings or aircraft.
