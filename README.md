@@ -87,7 +87,7 @@ Tile 1 shows distinct aircraft per 5 minutes and honours the dashboard time rang
 
 ## After the Fabric trial
 
-The Fabric items (Eventstream, Eventhouse, dashboard, Activator rule) will not exist after the trial ends, and the live parts need a Fabric capacity to re-run. What stays in this repo: the producer script, the KQL scripts, schema notes (`docs/schema-notes.md`), a sanitized dashboard export (`fabric-export/`, identifiers replaced with placeholders, no working data source), the problems log (`docs/problems-log.md`) and screenshots.
+The Fabric items (Eventstream, Eventhouse, dashboard, Activator rule) will not exist after the trial ends, and the live parts need a Fabric capacity to re-run. What stays in this repo: the producer script, the KQL scripts, schema notes (`docs/schema-notes.md`), a sanitized dashboard export (`fabric-export/`: dashboard, workspace, database and cluster identifiers replaced with placeholders; the 13 tile, query, page and data-source IDs generated inside the dashboard file were left as they are; no working data source), the problems log (`docs/problems-log.md`) and screenshots.
 
 ## Screenshots
 
