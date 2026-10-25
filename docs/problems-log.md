@@ -51,3 +51,8 @@
 - Outlook and Teams on the web did not work for this account. Cause not verified.
 - 'Send me a test action' failed with: 'The email test action could not be executed because the email address is not defined in your profile. To resolve a problem, add your email address to your Azure profile.'
 - Result so far: rule defined and activations recorded. Notification delivery NOT verified.
+
+## 2026-10-25 - Teams delivery error (observed, about 18:58 Dhaka time)
+- A Fabric notification appeared: 'There was an error with the Teams subscription. Please get a Microsoft Office subscription.' I did not determine what triggered it (a real activation or something else).
+- Together with the earlier email test failure (no email address in profile) and Outlook/Teams not opening for this account, notification delivery could not be verified.
+- Decision: no extra work on delivery. README states: rule defined, activations recorded, delivery not verified.
