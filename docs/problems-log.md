@@ -17,3 +17,9 @@
 - opensky_producer.py --once: authenticated, sent 321 events to the Eventstream custom endpoint.
 - X-Rate-Limit-Remaining header after 1 call: 3996 (matches 4,000 daily standard allowance minus 4 credits for this box).
 - Eventstream source src_opensky shows Active. No destination yet, so these events were not stored.
+
+## 2026-10-25 - Eventhouse ingestion verified (observed)
+- Destination dest_eh_opensky (direct ingestion, JSON) created table aircraft_states automatically. The Configure/Get data wizard did not appear in my UI; the panel had a table-name box instead (docs steps differ from my screen).
+- Count query returned 2,447 rows while the producer ran at 60 s intervals.
+- Schema: snapshot_utc is string; time_position/last_contact are long (epoch seconds). Extra columns added by Eventstream: PartitionId, EventProcessedUtcTime, EventEnqueuedUtcTime.
+- To handle in KQL: convert types at query time; same aircraft state can repeat across polls.

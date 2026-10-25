@@ -1,0 +1,9 @@
+// 00_verify_ingestion.kql - run in the eh_opensky queryset, one statement at a time
+
+.show tables
+
+aircraft_states
+| getschema
+
+aircraft_states
+| count
