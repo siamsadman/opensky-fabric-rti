@@ -5,3 +5,8 @@ aircraft_clean()
 | summarize aircraft = dcount(icao24), airborne = dcountif(icao24, not(on_ground)) by bin(position_time, 5m)
 | order by position_time asc
 | render timechart
+
+// Q2: top 10 origin countries (registration country inferred from the ICAO address, not flight location)
+aircraft_clean()
+| summarize aircraft = dcount(icao24), readings = count(), airborne_pct = round(100.0 * countif(not(on_ground)) / count(), 1) by origin_country
+| top 10 by aircraft desc
