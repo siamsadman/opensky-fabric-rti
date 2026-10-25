@@ -62,3 +62,13 @@ print raw_rows = toscalar(aircraft_states | count),
       last_event = toscalar(aircraft_states | summarize max(EventEnqueuedUtcTime)),
       unique_positions = toscalar(aircraft_clean() | count),
       distinct_aircraft = toscalar(aircraft_clean() | summarize dcount(icao24))
+
+// Q8: gaps above 90 s between snapshots in rows received 10:16-11:00 UTC (finds the producer restart gap)
+aircraft_states
+| where EventEnqueuedUtcTime between (datetime(2026-10-25 10:16:00) .. datetime(2026-10-25 11:00:00))
+| summarize rows = count() by snapshot_time = todatetime(snapshot_utc)
+| sort by snapshot_time asc
+| extend prev_snapshot = prev(snapshot_time)
+| extend gap_s = datetime_diff('second', snapshot_time, prev_snapshot)
+| where gap_s > 90
+| project prev_snapshot, snapshot_time, gap_s

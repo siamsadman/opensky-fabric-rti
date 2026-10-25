@@ -41,7 +41,7 @@ Why a producer script: OpenSky now requires OAuth2 client credentials. The Event
 | Rows removed by `aircraft_clean()` | 8,583 (about 15.7 percent), mostly repeated positions |
 | Distinct aircraft | about 1,086 (`dcount` estimate) |
 
-I stopped and restarted the producer once, at about 10:40 UTC. "Rows" means ingested events, not distinct readings or aircraft. Each poll resends aircraft that have not reported a new position, which is why repeats exist: in an earlier sample, 1,855 of 11,257 raw rows were repeated positions and none lacked a position.
+I stopped and restarted the producer once: the data has a gap of 487 s between snapshots at 10:35:09 and 10:43:16 UTC. "Rows" means ingested events, not distinct readings or aircraft. Each poll resends aircraft that have not reported a new position, which is why repeats exist: in an earlier sample, 1,855 of 11,257 raw rows were repeated positions and none lacked a position.
 
 ## KQL in this repo
 
@@ -50,7 +50,7 @@ I stopped and restarted the producer once, at about 10:40 UTC. "Rows" means inge
 | `kql/00_verify_ingestion.kql` | table list, schema, row count, row count with time range |
 | `kql/01_functions.kql` | `aircraft_clean()` |
 | `kql/02_dedup_breakdown.kql` | raw rows split into unique positions and repeats |
-| `kql/03_analysis.kql` | Q1 aircraft per 5 minutes, Q2 top origin countries, Q3a vertical-rate distribution, Q3b emergency squawk codes, Q4 threshold frequency, Q5 altitude consistency, Q6 data gaps, Q7 final counts |
+| `kql/03_analysis.kql` | Q1 aircraft per 5 minutes, Q2 top origin countries, Q3a vertical-rate distribution, Q3b emergency squawk codes, Q4 threshold frequency, Q5 altitude consistency, Q6 data gaps, Q7 final counts, Q8 gap at the producer restart |
 | `kql/04_dashboard_tiles.kql` | the two dashboard tile queries |
 
 What I saw on this data (times are when I ran each query):
@@ -77,7 +77,7 @@ Tile 1 shows distinct aircraft per 5 minutes and honours the dashboard time rang
 
 ## Problems, limits and what I did not verify
 
-- **Data gaps:** the data is not a continuous 60-second series. Seven gaps longer than 90 seconds, up to 431 seconds, are listed in `docs/problems-log.md`. Two match producer timeouts on 19:17 to 19:27 Dhaka time; the other five (12:13 to 12:43 UTC) are unexplained.
+- **Data gaps:** the data is not a continuous 60-second series. Eight gaps longer than 90 seconds, up to 487 seconds, are listed in `docs/problems-log.md`. One is the producer restart (10:35:09 to 10:43:16 UTC), two match producer timeouts at 19:17 to 19:27 Dhaka time, and the other five (12:13 to 12:43 UTC) are unexplained.
 - **Producer timeouts:** one ReadTimeout and several ConnectTimeouts calling OpenSky; the script logs the error and tries again at the next interval and recovered each time. Cause not determined (OpenSky or my network). The script has no retry logic of its own.
 - **Events before the destination existed:** a test run of 321 events was sent before the Eventhouse destination was added. The table's first event is 10:16 UTC, so those events appear not to have been stored (inferred from timestamps).
 - **Rapid-descent flag is a data check, not a safety signal.** Many reported rapid descents looked inconsistent with altitude, which could be bad values, and I did not establish what actually happened.

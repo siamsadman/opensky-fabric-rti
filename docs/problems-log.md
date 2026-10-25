@@ -88,3 +88,8 @@
 - unique_positions 46,004 (aircraft_clean(): one row per icao24 + position_time); distinct_aircraft about 1,086 (dcount estimate).
 - Rows removed by aircraft_clean(): 8,583 (about 15.7 percent of raw); mostly repeated positions, but rows with no position would also be removed (not separately counted for the full table).
 - 'Rows' here means ingested events, not distinct readings or aircraft.
+
+## 2026-10-25 - Producer restart gap measured (observed, query run at 14:19 UTC)
+- Query over rows received 10:16-11:00 UTC lists one gap above 90 s: snapshots at 10:35:09 and 10:43:16 UTC (487 s).
+- Matches stopping and restarting the producer (the second run's first log line was 16:43:15 Dhaka = 10:43:15 UTC). The README had said 'about 10:40 UTC'; corrected to the measured 10:35:09 to 10:43:16 UTC.
+- Q6 only covered rows received from 10:43 UTC, so it missed this gap. By my reading of the two queries together the table has 8 gaps above 90 s, up to 487 s. README corrected from 'seven, up to 431 s'.
