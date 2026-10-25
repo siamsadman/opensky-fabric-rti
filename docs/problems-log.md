@@ -28,3 +28,9 @@
 - Eventstream has an HTTP source (preview) for REST APIs. The Learn pages I read list Anonymous/Basic/API key auth and say OAuth is not supported (the newest page also lists organizational account and service principal; I did not check what that covers).
 - OpenSky now requires OAuth2 client credentials (basic auth not accepted) with 30-minute tokens, so I used a Python producer sending to an Eventstream custom endpoint.
 - I did NOT test the HTTP source. Anonymous OpenSky access would be limited to 400 credits/day.
+
+## 2026-10-25 - aircraft_clean() and duplicate check (observed about 16:55 Dhaka time, producer running)
+- Created function aircraft_clean(): epoch seconds to datetime, drop rows without a position, keep one row per icao24 + position_time.
+- One-pass breakdown: 11,257 raw rows = 0 without position + 9,402 unique positions + 1,855 repeated rows (about 16.5 percent repeats).
+- In this sample the whole raw-vs-clean gap is repeats; no rows lacked a position.
+- An earlier two-step count (10,916 raw / 9,133 clean) was taken at different moments while data kept arriving, so I did not use it for the repeat rate.

@@ -1,0 +1,9 @@
+// 02_dedup_breakdown.kql - splits raw rows into repeats vs unique positions in one pass
+aircraft_states
+| extend position_time = unixtime_seconds_todatetime(time_position),
+         has_pos = isnotnull(latitude) and isnotnull(longitude) and isnotnull(time_position)
+| summarize n = count() by has_pos, icao24, position_time
+| summarize raw_rows = sum(n),
+            no_position_rows = sumif(n, not(has_pos)),
+            unique_positions = countif(has_pos),
+            repeated_rows = sumif(n, has_pos) - countif(has_pos)

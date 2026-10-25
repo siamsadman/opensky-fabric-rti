@@ -1,0 +1,14 @@
+// 01_functions.kql - typed, de-duplicated view of the raw aircraft_states table
+.create-or-alter function with (folder = "opensky", docstring = "Typed, de-duplicated aircraft positions") aircraft_clean() {
+    aircraft_states
+    | extend position_time = unixtime_seconds_todatetime(time_position),
+             last_contact_time = unixtime_seconds_todatetime(last_contact),
+             snapshot_time = todatetime(snapshot_utc)
+    | where isnotnull(latitude) and isnotnull(longitude) and isnotnull(position_time)
+    | summarize arg_max(EventEnqueuedUtcTime, *) by icao24, position_time
+    | extend speed_kmh = velocity * 3.6
+    | project icao24, callsign, origin_country, position_time, last_contact_time, snapshot_time,
+              latitude, longitude, baro_altitude_m = baro_altitude, geo_altitude_m = geo_altitude,
+              speed_kmh, vertical_rate_ms = vertical_rate, true_track, on_ground, squawk,
+              EventEnqueuedUtcTime
+}
