@@ -10,3 +10,14 @@ aircraft_clean()
 aircraft_clean()
 | summarize aircraft = dcount(icao24), readings = count(), airborne_pct = round(100.0 * countif(not(on_ground)) / count(), 1) by origin_country
 | top 10 by aircraft desc
+
+// Q3a: vertical-rate distribution of airborne aircraft (m/s, negative = descending) - used to choose an alert threshold
+aircraft_clean()
+| where not(on_ground) and isnotnull(vertical_rate_ms)
+| summarize readings = count(), p01 = percentile(vertical_rate_ms, 1), p05 = percentile(vertical_rate_ms, 5), p50 = percentile(vertical_rate_ms, 50), p95 = percentile(vertical_rate_ms, 95), p99 = percentile(vertical_rate_ms, 99), min_vr = min(vertical_rate_ms), max_vr = max(vertical_rate_ms)
+
+// Q3b: emergency squawk codes (7500, 7600, 7700)
+aircraft_clean()
+| where squawk in ("7500", "7600", "7700")
+| project position_time, icao24, callsign, origin_country, squawk, latitude, longitude, baro_altitude_m
+| order by position_time desc
