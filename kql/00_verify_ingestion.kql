@@ -7,3 +7,7 @@ aircraft_states
 
 aircraft_states
 | count
+
+// Row count and time range in one result (used for screenshot 04)
+aircraft_states
+| summarize rows = count(), first_event = min(EventEnqueuedUtcTime), last_event = max(EventEnqueuedUtcTime)
