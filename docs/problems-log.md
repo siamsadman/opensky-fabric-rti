@@ -68,3 +68,10 @@
 - The export contained identifiers (dashboard id, eTag, cluster URI, database artifact id, workspace id). Replaced with REDACTED- placeholders (6 occurrences) in fabric-export/OpenSky_Live_Dashboard.sanitized.json.
 - First sanitising pass missed the eTag (escaped text); my own leak check had the same blind spot. Fixed with a regex on the eTag line and re-checked by counting occurrences, not lines.
 - The sanitized file has no working data source, so it documents the tiles and queries but cannot be re-imported as-is.
+
+## 2026-10-25 - Producer timeouts and recovery (observed in the producer window, Dhaka local time)
+- 19:17:20 ReadTimeout and 19:17:51 ConnectTimeout calling OpenSky (my script uses a 30 s timeout). Sends at 19:18:37 and 19:19:31.
+- Six consecutive ConnectTimeouts, once a minute, 19:20:51 to 19:25:51. Sends resumed at 19:26:46 and 19:27:31 without restarting the script (it logs the error and tries again at the next interval; no retry logic).
+- Credits: 3332 (19:19:31) to 3328 (19:26:46) = 4, so the six connect timeouts were not charged. 3344 (19:15:31) to 3336 (19:18:37) = 8; the ReadTimeout call was probably charged (inference).
+- Cause not determined (OpenSky side or my network). I did not run a connectivity test because polling had recovered.
+- Failed polls were skipped, so the table has gaps; to be measured with a KQL query.
