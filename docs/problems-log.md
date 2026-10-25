@@ -75,3 +75,10 @@
 - Credits: 3332 (19:19:31) to 3328 (19:26:46) = 4, so the six connect timeouts were not charged. 3344 (19:15:31) to 3336 (19:18:37) = 8; the ReadTimeout call was probably charged (inference).
 - Cause not determined (OpenSky side or my network). I did not run a connectivity test because polling had recovered.
 - Failed polls were skipped, so the table has gaps; to be measured with a KQL query.
+
+## 2026-10-25 - Gaps in the data since the 10:43 UTC restart (observed, query run at 13:32 UTC)
+- Query lists gaps longer than 90 s between consecutive OpenSky snapshots in rows received since 10:43 UTC.
+- Seven gaps (UTC): 12:13:18-12:15:18 (120 s), 12:23:19-12:29:19 (360 s), 12:29:19-12:32:25 (186 s), 12:32:25-12:38:49 (384 s), 12:38:49-12:43:41 (292 s), 13:15:35-13:18:39 (184 s), 13:19:34-13:26:45 (431 s).
+- The last two match the producer timeouts (19:17-19:27 Dhaka = 13:17-13:27 UTC). The first five (12:13-12:43 UTC = 18:13-18:43 Dhaka) are unexplained; I did not see the producer window for that period.
+- Gaps total 1,957 s between consecutive snapshots (each includes a normal ~60 s interval).
+- Consequence: not a continuous 60 s series. The Q5 consistency check only used reading pairs 5-120 s apart, so gaps reduce that sample.

@@ -45,3 +45,13 @@ aircraft_clean()
 | summarize hits = count(),
             consistent = countif(abs(vertical_rate_ms - computed_vr) <= 5),
             inconsistent = countif(abs(vertical_rate_ms - computed_vr) > 5)
+
+// Q6: gaps longer than 90 s between consecutive OpenSky snapshots, since the 10:43 UTC producer restart
+aircraft_states
+| where EventEnqueuedUtcTime >= datetime(2026-10-25 10:43:00)
+| summarize rows = count() by snapshot_time = todatetime(snapshot_utc)
+| sort by snapshot_time asc
+| extend prev_snapshot = prev(snapshot_time)
+| extend gap_s = datetime_diff('second', snapshot_time, prev_snapshot)
+| where gap_s > 90
+| project prev_snapshot, snapshot_time, gap_s
