@@ -31,3 +31,17 @@ aircraft_clean()
             below_minus25 = countif(vertical_rate_ms < -25),
             aircraft_below_minus20 = dcountif(icao24, vertical_rate_ms < -20),
             minutes_of_data = datetime_diff('minute', max(position_time), min(position_time))
+
+// Q5: do reported rapid descents (below -20 m/s) agree with the altitude change between consecutive readings? (tolerance 5 m/s is my choice)
+aircraft_clean()
+| where not(on_ground) and isnotnull(baro_altitude_m) and isnotnull(vertical_rate_ms)
+| sort by icao24 asc, position_time asc
+| extend prev_icao = prev(icao24), prev_time = prev(position_time), prev_alt = prev(baro_altitude_m)
+| where prev_icao == icao24
+| extend dt_s = datetime_diff('second', position_time, prev_time)
+| where dt_s between (5 .. 120)
+| extend computed_vr = (baro_altitude_m - prev_alt) / dt_s
+| where vertical_rate_ms < -20
+| summarize hits = count(),
+            consistent = countif(abs(vertical_rate_ms - computed_vr) <= 5),
+            inconsistent = countif(abs(vertical_rate_ms - computed_vr) > 5)
