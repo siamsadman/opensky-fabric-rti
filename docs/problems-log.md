@@ -43,3 +43,11 @@
 ## 2026-10-25 - Simple rapid-descent rule was mostly noise (observed, about 17:48 Dhaka time)
 - Q5: of 12 readings reported below -20 m/s, 2 matched the altitude change between consecutive readings (within 5 m/s), 10 did not. Small sample (about 85 minutes). Cause of the mismatches not investigated.
 - Decision: dashboard tile 2 and the planned alert use the stricter rule (reported rate below -20 m/s AND within 5 m/s of the altitude-derived rate). Expected to fire rarely.
+
+## 2026-10-25 - Activator rule and notification test (observed, about 18:48 Dhaka time)
+- Rule rapid_descent_consistent created from dashboard tile 2: condition vertical_rate_ms less than -20, query runs every 5 minutes, action is a Teams message to my own account.
+- Mistake: the rule first saved with the condition 'Is equal to -20'. Corrected to 'Is less than' (I had suggested the option without having seen the dropdown).
+- Rule status: Running. Activations listed: 3 (position times 11:44:16, 12:15:17 and 12:44:52 UTC), all India-registered aircraft.
+- Outlook and Teams on the web did not work for this account. Cause not verified.
+- 'Send me a test action' failed with: 'The email test action could not be executed because the email address is not defined in your profile. To resolve a problem, add your email address to your Azure profile.'
+- Result so far: rule defined and activations recorded. Notification delivery NOT verified.
