@@ -23,3 +23,8 @@
 - Count query returned 2,447 rows while the producer ran at 60 s intervals.
 - Schema: snapshot_utc is string; time_position/last_contact are long (epoch seconds). Extra columns added by Eventstream: PartitionId, EventProcessedUtcTime, EventEnqueuedUtcTime.
 - To handle in KQL: convert types at query time; same aircraft state can repeat across polls.
+
+## 2026-10-25 - Why a producer script instead of an Eventstream source
+- Eventstream has an HTTP source (preview) for REST APIs. The Learn pages I read list Anonymous/Basic/API key auth and say OAuth is not supported (the newest page also lists organizational account and service principal; I did not check what that covers).
+- OpenSky now requires OAuth2 client credentials (basic auth not accepted) with 30-minute tokens, so I used a Python producer sending to an Eventstream custom endpoint.
+- I did NOT test the HTTP source. Anonymous OpenSky access would be limited to 400 credits/day.
