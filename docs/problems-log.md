@@ -42,6 +42,7 @@
 
 ## 2026-10-25 - Simple rapid-descent rule was mostly noise (observed, about 17:48 Dhaka time)
 - Q5: of 12 readings reported below -20 m/s, 2 matched the altitude change between consecutive readings (within 5 m/s), 10 did not. Small sample (about 85 minutes). Cause of the mismatches not investigated.
+- Q5 rerun on the final data (27 Oct 2026): 23 of the 26 readings had a comparable earlier reading; 4 consistent, 19 inconsistent. Cause still not investigated.
 - Decision: dashboard tile 2 and the planned alert use the stricter rule (reported rate below -20 m/s AND within 5 m/s of the altitude-derived rate). Expected to fire rarely.
 
 ## 2026-10-25 - Activator rule and notification test (observed, about 18:48 Dhaka time)
@@ -93,3 +94,12 @@
 - Query over rows received 10:16-11:00 UTC lists one gap above 90 s: snapshots at 10:35:09 and 10:43:16 UTC (487 s).
 - Matches stopping and restarting the producer (the second run's first log line was 16:43:15 Dhaka = 10:43:15 UTC). The README had said 'about 10:40 UTC'; corrected to the measured 10:35:09 to 10:43:16 UTC.
 - Q6 only covered rows received from 10:43 UTC, so it missed this gap. By my reading of the two queries together the table has 8 gaps above 90 s, up to 487 s. README corrected from 'seven, up to 431 s'.
+
+## 2026-10-27 - Power BI report: problems found and fixed (observed in Power BI Desktop and through the model)
+- The 5-minute window column (Window5m) loaded as text: the Power Query step added it with #datetime(...) but no step set its type. A type step was added; the model now shows dateTime, 43 distinct windows from 09:55 to 13:30 UTC, and 46,004 rows after the reload.
+- Display formats set in the model: Window5m HH:mm, position_time yyyy-MM-dd HH:mm:ss. Desktop still shows 12-hour tick labels (10:00 AM) on the continuous time axis; accepted.
+- Top 8 origin countries: a TopN filter ranked by distinct aircraft was not used (the report authoring skill's documentation warns about a Desktop crash when a measure is used in that ranking; I did not test it; the CLI's aggregation list did not show a distinct count, which I did not verify independently). Replaced by a measure that is blank outside the top 8. A test query returned exactly 8 countries, India 588 down to Qatar 24.
+- KPI cards first showed 46K / 1K / 1K. Setting the display-units value to 0 changed nothing; setting it to 1 showed 46,004 / 1,088 / 1,081 / 26.
+- Desktop rewrites report files when it opens and saves them: visual schema versions bumped from 2.9.0 to 2.14.0 (the 2.14.0 schema URL could not be fetched, so the validator reports one warning, accepted), the table's column sizing was reset to fit-to-content twice, and Q&A linguistic metadata was added to the model's en-US culture file for the renamed table headers.
+- Screenshots: after one reload Desktop rendered the page tiny on a gray canvas; closing and reopening the project fixed it. A retry that reused an existing file name failed; I did not establish whether the name was the cause.
+- Checks: the table's 26 rows equal the Readings Below -20 m/s measure, and the top nine table rows match a DAX query on the model. The five count measures were cross-checked in KQL on the final data (Q9) and all matched: 46,004 / 1,088 / 1,081 / 26 / 21. The Top 8 countries measure was checked with a DAX query only.

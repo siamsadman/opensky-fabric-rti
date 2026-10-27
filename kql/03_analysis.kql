@@ -44,7 +44,8 @@ aircraft_clean()
 | where vertical_rate_ms < -20
 | summarize hits = count(),
             consistent = countif(abs(vertical_rate_ms - computed_vr) <= 5),
-            inconsistent = countif(abs(vertical_rate_ms - computed_vr) > 5)
+            inconsistent = countif(abs(vertical_rate_ms - computed_vr) > 5)
+// Result on the final data (queried 27 Oct 2026): hits 23, consistent 4, inconsistent 19. An earlier run on partial data (about 85 minutes) gave 12 / 2 / 10.
 
 // Q6: gaps longer than 90 s between consecutive OpenSky snapshots, since the 10:43 UTC producer restart
 aircraft_states
@@ -72,3 +73,10 @@ aircraft_states
 | extend gap_s = datetime_diff('second', snapshot_time, prev_snapshot)
 | where gap_s > 90
 | project prev_snapshot, snapshot_time, gap_s
+
+// Q9: cross-check of the Power BI report measures against the final data (queried 27 Oct 2026). Result: 46,004 / 1,088 / 1,081 / 26 / 21, matching the report.
+print position_rows = toscalar(aircraft_clean() | count),
+      distinct_aircraft = toscalar(aircraft_clean() | distinct icao24 | count),
+      airborne_aircraft = toscalar(aircraft_clean() | where not(on_ground) | distinct icao24 | count),
+      readings_below_m20 = toscalar(aircraft_clean() | where not(on_ground) and vertical_rate_ms < -20 | count),
+      aircraft_below_m20 = toscalar(aircraft_clean() | where not(on_ground) and vertical_rate_ms < -20 | distinct icao24 | count)

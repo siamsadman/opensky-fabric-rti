@@ -40,3 +40,4 @@ Converts epoch seconds to datetimes, drops rows with no position, keeps one row 
 - Each poll resends aircraft: in one sample, 1,855 of 11,257 raw rows (about 16.5 percent) were repeated positions.
 - origin_country comes from the transponder address per the OpenSky docs, so it is registration country, not where the aircraft is.
 - Rapid-descent check: of 12 readings below -20 m/s, only 2 agreed with the altitude-derived rate (tolerance 5 m/s, my choice; about 85 minutes of data).
+- Rapid-descent check on the final data (27 Oct 2026): 23 comparable readings, 4 agreed, 19 did not (same tolerance).

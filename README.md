@@ -51,7 +51,7 @@ I stopped and restarted the producer once: the data has a gap of 487 s between s
 | `kql/00_verify_ingestion.kql` | table list, schema, row count, row count with time range |
 | `kql/01_functions.kql` | `aircraft_clean()` |
 | `kql/02_dedup_breakdown.kql` | raw rows split into unique positions and repeats |
-| `kql/03_analysis.kql` | Q1 aircraft per 5 minutes, Q2 top origin countries, Q3a vertical-rate distribution, Q3b emergency squawk codes, Q4 threshold frequency, Q5 altitude consistency, Q6 data gaps, Q7 final counts, Q8 gap at the producer restart |
+| `kql/03_analysis.kql` | Q1 aircraft per 5 minutes, Q2 top origin countries, Q3a vertical-rate distribution, Q3b emergency squawk codes, Q4 threshold frequency, Q5 altitude consistency, Q6 data gaps, Q7 final counts, Q8 gap at the producer restart, Q9 cross-check of the Power BI report measures |
 | `kql/04_dashboard_tiles.kql` | the two dashboard tile queries |
 
 What I saw on this data (times are when I ran each query):
@@ -60,7 +60,7 @@ What I saw on this data (times are when I ran each query):
 - **Vertical rate of airborne readings (11:12 UTC, 14,104 readings):** median 0 m/s, 5th to 95th percentile about -8.8 to +9.7 m/s, extremes -44.87 and +26.33 m/s.
 - **Emergency squawk codes 7500, 7600, 7700:** no rows when I ran the query at 11:14 UTC. I did not re-run it on the full table.
 - **Rapid-descent frequency (11:19 UTC, 15,938 airborne readings):** 71 below -15 m/s, 8 below -20 m/s, 5 below -25 m/s.
-- **Consistency check:** of 12 readings reported below -20 m/s, 2 agreed with the rate calculated from the altitude change between consecutive readings (within 5 m/s, a tolerance I chose); 10 did not. Small sample, and I did not investigate why they disagree.
+- **Consistency check:** on the final data (queried 27 Oct 2026), 23 of the 26 airborne readings reported below -20 m/s had an earlier reading from the same aircraft 5 to 120 seconds before, so a rate could be calculated from the altitude change. 4 agreed with the reported rate (within 5 m/s, a tolerance I chose) and 19 did not. An earlier run on partial data (about 85 minutes) found 12 readings, 2 agreed and 10 did not. I did not investigate why they disagree.
 
 ## Dashboard
 
@@ -84,8 +84,8 @@ A one-page Power BI report built in Power BI Desktop from an **imported snapshot
 
 - **Page:** four KPI cards (position readings, distinct aircraft, airborne aircraft, airborne readings below -20 m/s), distinct aircraft per 5-minute window, the top 8 origin countries, and a table of the airborne readings reported below -20 m/s.
 - **Measures:** six DAX measures (`Position Rows`, `Distinct Aircraft`, `Airborne Aircraft`, `Readings Below -20 m/s`, `Aircraft Below -20 m/s` and `Distinct Aircraft (Top 8 countries)`), all counts over the 46,004 imported rows.
-- **Checks:** the imported row count (46,004) matches the KQL result. The table's 26 readings equal the `Readings Below -20 m/s` measure, and the nine rows at the top of the table match a DAX query on the model. The other measures were checked in the model only, not cross-checked in KQL.
-- **Limits:** the time axis shows 12-hour labels, because Desktop formats continuous time axes itself. The table scrolls: about eight of its 26 rows are visible at once. `origin_country` is registration country, not location. "Reported rate" means the vertical rate as reported, which a separate KQL check found often inconsistent with the altitude change (see above).
+- **Checks:** the five count measures (`Position Rows`, `Distinct Aircraft`, `Airborne Aircraft`, `Readings Below -20 m/s`, `Aircraft Below -20 m/s`) match a KQL cross-check on the final data (46,004 / 1,088 / 1,081 / 26 / 21; query Q9). The table's 26 readings equal the `Readings Below -20 m/s` measure, and the nine rows at the top of the table match a DAX query on the model. `Distinct Aircraft (Top 8 countries)` was checked with a DAX query only, not in KQL.
+- **Limits:** the time axis shows 12-hour labels, because Desktop formats continuous time axes itself. The table scrolls: about eight of its 26 rows are visible at once. `origin_country` is registration country, not location. "Reported rate" means the vertical rate as reported, which the KQL check above found inconsistent with the altitude change for 19 of the 23 readings it could compare.
 - **Not published:** the Power BI project files are not in this repository, because they contain the Eventhouse address.
 
 ## Problems, limits and what I did not verify
@@ -94,7 +94,7 @@ A one-page Power BI report built in Power BI Desktop from an **imported snapshot
 - **Producer timeouts:** one ReadTimeout and several ConnectTimeouts calling OpenSky; the script logs the error and tries again at the next interval and recovered each time. Cause not determined (OpenSky or my network). The script has no retry logic of its own.
 - **Events before the destination existed:** a test run of 321 events was sent before the Eventhouse destination was added. The table's first event is 10:16 UTC, so those events appear not to have been stored (inferred from timestamps).
 - **Rapid-descent flag is a data check, not a safety signal.** Many reported rapid descents looked inconsistent with altitude, which could be bad values, and I did not establish what actually happened.
-- **Mistakes I made and fixed:** the first dashboard tile ignored the time-range filter, so its label did not match its data; the Activator rule first saved with the operator "is equal to" instead of "is less than"; I first counted live-feed rows as activations; my first sanitising pass on the dashboard export missed one identifier. All are in the log.
+- **Mistakes I made and fixed:** the first dashboard tile ignored the time-range filter, so its label did not match its data; the Activator rule first saved with the operator "is equal to" instead of "is less than"; I first counted live-feed rows as activations; my first sanitising pass on the dashboard export missed one identifier; the Power BI report's 5-minute window column first loaded as text because its query had no type step. All are in the log.
 - **Not tested:** the Eventstream HTTP source, ingestion latency, setting the project up from scratch on another machine, and a live (DirectQuery) Power BI connection to the Eventhouse.
 - **The producer script has local paths hard-coded** (for credentials and the connection string, kept outside this repo).
 
