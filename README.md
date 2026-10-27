@@ -30,6 +30,7 @@ Why a producer script: OpenSky now requires OAuth2 client credentials. The Event
 - **KQL:** a saved function `aircraft_clean()` (typed datetimes, one row per aircraft and position time) and the queries listed below.
 - **Real-Time Dashboard** `OpenSky_Live_Dashboard` with two tiles.
 - **Activator rule** `rapid_descent_consistent`.
+- **Power BI report** (Power BI Desktop): one page on an imported snapshot, with six DAX measures.
 
 ## The data (queried 13:37 UTC, after I stopped the producer)
 
@@ -75,6 +76,18 @@ Tile 1 shows distinct aircraft per 5 minutes and honours the dashboard time rang
 
 ![Activator history](screenshots/18-activator-history.png)
 
+## Power BI report
+
+A one-page Power BI report built in Power BI Desktop from an **imported snapshot** of `aircraft_clean()`, not a live connection to the Eventhouse. The report was built with Claude Code and Microsoft's Power BI authoring plugin.
+
+![Power BI report page](screenshots/22-powerbi-report.png)
+
+- **Page:** four KPI cards (position readings, distinct aircraft, airborne aircraft, airborne readings below -20 m/s), distinct aircraft per 5-minute window, the top 8 origin countries, and a table of the airborne readings reported below -20 m/s.
+- **Measures:** six DAX measures (`Position Rows`, `Distinct Aircraft`, `Airborne Aircraft`, `Readings Below -20 m/s`, `Aircraft Below -20 m/s` and `Distinct Aircraft (Top 8 countries)`), all counts over the 46,004 imported rows.
+- **Checks:** the imported row count (46,004) matches the KQL result. The table's 26 readings equal the `Readings Below -20 m/s` measure, and the nine rows at the top of the table match a DAX query on the model. The other measures were checked in the model only, not cross-checked in KQL.
+- **Limits:** the time axis shows 12-hour labels, because Desktop formats continuous time axes itself. The table scrolls: about eight of its 26 rows are visible at once. `origin_country` is registration country, not location. "Reported rate" means the vertical rate as reported, which a separate KQL check found often inconsistent with the altitude change (see above).
+- **Not published:** the Power BI project files are not in this repository, because they contain the Eventhouse address.
+
 ## Problems, limits and what I did not verify
 
 - **Data gaps:** the data is not a continuous 60-second series. Eight gaps longer than 90 seconds, up to 487 seconds, are listed in `docs/problems-log.md`. One is the producer restart (10:35:09 to 10:43:16 UTC), two match producer timeouts at 19:17 to 19:27 Dhaka time, and the other five (12:13 to 12:43 UTC) are unexplained.
@@ -82,7 +95,7 @@ Tile 1 shows distinct aircraft per 5 minutes and honours the dashboard time rang
 - **Events before the destination existed:** a test run of 321 events was sent before the Eventhouse destination was added. The table's first event is 10:16 UTC, so those events appear not to have been stored (inferred from timestamps).
 - **Rapid-descent flag is a data check, not a safety signal.** Many reported rapid descents looked inconsistent with altitude, which could be bad values, and I did not establish what actually happened.
 - **Mistakes I made and fixed:** the first dashboard tile ignored the time-range filter, so its label did not match its data; the Activator rule first saved with the operator "is equal to" instead of "is less than"; I first counted live-feed rows as activations; my first sanitising pass on the dashboard export missed one identifier. All are in the log.
-- **Not tested:** the Eventstream HTTP source, ingestion latency, setting the project up from scratch on another machine, and a Power BI report on the Eventhouse.
+- **Not tested:** the Eventstream HTTP source, ingestion latency, setting the project up from scratch on another machine, and a live (DirectQuery) Power BI connection to the Eventhouse.
 - **The producer script has local paths hard-coded** (for credentials and the connection string, kept outside this repo).
 
 ## After the Fabric trial
@@ -104,5 +117,6 @@ The Fabric items (Eventstream, Eventhouse, dashboard, Activator rule) will not e
 | 15, 16, 17, 18 | Activator rule; test action error; notification errors; history |
 | 19 | producer terminal: timeouts and recovery |
 | 20, 21 | data gaps; final counts |
+| 22 | Power BI report page (imported snapshot) |
 
 Screenshots were taken in the Fabric UI on 25 Oct 2026.
